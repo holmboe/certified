@@ -140,6 +140,23 @@ grep -q "DNS:example.com"
 openssl x509 -in "etc/ssl/certs/san.crt" -noout -text |
 grep -q "IP Address:127.0.0.1"
 
+# Test that we can add msUPN SAN (OID 1.3.6.1.4.1.311.20.2.3).
+certified CN="msUPN" +"otherName:msUPN;UTF8:john.doe@example.com"
+openssl x509 -in "etc/ssl/certs/msupn.crt" -noout -text |
+grep -q "othername:<unsupported>"
+openssl x509 -in "etc/ssl/certs/msupn.crt" -outform der |
+openssl asn1parse -inform der -i -strparse \
+        `openssl x509 -in etc/ssl/certs/msupn.crt -outform der | \
+         openssl asn1parse -inform der -i | \
+         grep -A 1 "Subject Alternative Name" | \
+         tail -1 | cut -f1 -d:` | tail -1 | \
+grep -q "john.doe@example.com"
+
+# Test that we can generate a certificate with an email Common Name
+certified CN="john.doe@example.com" +"otherName:msUPN;UTF8:john.doe@example.com"
+openssl x509 -in "etc/ssl/certs/john.doe@example.com.crt" -noout -text |
+    grep -q "Subject: CN=john.doe@example.com"
+
 # Test that a valid DNS name as CN is added as a subject alternative name.
 certified CN="example.com"
 openssl x509 -in "etc/ssl/certs/example.com.crt" -noout -text |

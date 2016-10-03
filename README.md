@@ -57,6 +57,15 @@ certified CN="localhost" +"127.0.0.1"
 
 The [wiki](https://github.com/rcrowley/certified/wiki) further documents common usage patterns and how to use your CA with various browsers, operating systems, and programming languages.
 
+Advanced topics
+---------------
+
+Generate a certificate with an UPN used by Microsoft. Note that `otherName` is case sensitive:
+
+```sh
+certified CN="john.doe@example.com" +"otherName:msUPN;UTF8:john.doe@example.com"
+```
+
 TODO
 ----
 

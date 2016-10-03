@@ -27,6 +27,7 @@ set -e
 
 SAN_DNS=""
 SAN_IP=""
+SAN_OTHERNAME=""
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -60,6 +61,10 @@ do
         ST=*) ST="$(echo "$1" | cut -d"=" -f"2-")" shift;;
         +*)
             SAN="$(echo "$1" | cut -c"2-")" shift
+            # Only one otherName is supported
+            if is_othername "$SAN"
+            then SAN_OTHERNAME="$SAN"
+            fi
             if is_ip "$SAN"
             then SAN_IP="$SAN_IP $SAN"
             elif is_dns "$SAN"
@@ -176,7 +181,10 @@ EOF
     then echo "keyUsage = critical, cRLSign, keyCertSign, nonRepudiation"
     else echo "keyUsage = critical, digitalSignature, keyEncipherment"
     fi
-    if [ "$SAN_DNS" -o "$SAN_IP" ]
+    # The otherName cannot be used in conjunction with other SANs
+    if [ "$SAN_OTHERNAME" ]
+    then echo "subjectAltName = $SAN_OTHERNAME"
+    elif [ "$SAN_DNS" -o "$SAN_IP" ]
     then echo "subjectAltName = @san"
     fi
     echo "subjectKeyIdentifier = hash"

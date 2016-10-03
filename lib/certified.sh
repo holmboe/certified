@@ -35,6 +35,11 @@ if_echo() {
     fi
 }
 
+# Return zero if the first argument is otherName. Return non-zero otherwise.
+is_othername() {
+    echo "$1" | grep -E -q "otherName"
+}
+
 # Return zero if the first argument looks like a DNS name, including wildcards
 # and single labels.  Return non-zero otherwise.
 is_dns() {
